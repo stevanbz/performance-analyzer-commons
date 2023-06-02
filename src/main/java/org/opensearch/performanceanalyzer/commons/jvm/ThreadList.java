@@ -296,16 +296,13 @@ public class ThreadList {
     }
 
     static void runThreadDump(String pid, String[] args) {
-        /**
-         * String currentThreadName = Thread.currentThread().getName();
-         *         assert currentThreadName.startsWith(
-         *                                 ScheduledMetricCollectorsExecutor.COLLECTOR_THREAD_POOL_NAME)
-         *                         || currentThreadName.equals(
-         *                                 ScheduledMetricCollectorsExecutor.class.getSimpleName())
-         *                 : String.format(
-         *                         "Thread dump called from a non os collector thread: %s", currentThreadName);
-         */
-
+        String currentThreadName = Thread.currentThread().getName();
+        assert currentThreadName.startsWith(
+                                ScheduledMetricCollectorsExecutor.COLLECTOR_THREAD_POOL_NAME)
+                        || currentThreadName.equals(
+                                ScheduledMetricCollectorsExecutor.class.getSimpleName())
+                : String.format(
+                        "Thread dump called from a non os collector thread: %s", currentThreadName);
         jTidNameMap.clear();
         oldNativeTidMap.putAll(nativeTidMap);
         nativeTidMap.clear();
