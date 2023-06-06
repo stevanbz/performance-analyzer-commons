@@ -65,11 +65,11 @@ public class NetworkInterface {
     private static NetInterfaceMetrics oldMetrics = new NetInterfaceMetrics();
     private static Map<String, Long> currentMetrics6 = new HashMap<>();
 
-    private static ResourceObserver ipv4Observer = new Ipv4Observer();
+    private static final ResourceObserver ipv4Observer = new Ipv4Observer();
 
-    private static ResourceObserver ipv6Observer = new Ipv6Observer();
+    private static final ResourceObserver ipv6Observer = new Ipv6Observer();
 
-    private static ResourceObserver deviceNetworkStatsObserver = new DeviceNetworkStatsObserver();
+    private static final ResourceObserver deviceNetworkStatsObserver = new DeviceNetworkStatsObserver();
     private static Map<String, Long> oldMetrics6 = new HashMap<>();
     private static long kvTimestamp = 0;
     private static long oldkvTimestamp = 0;
