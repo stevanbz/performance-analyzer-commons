@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.opensearch.performanceanalyzer.commons.os.observer.impl;
+package org.opensearch.performanceanalyzer.commons.hwnet.observer.impl;
 
 
 import com.google.common.base.Splitter;
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensearch.performanceanalyzer.commons.collectors.StatsCollector;
-import org.opensearch.performanceanalyzer.commons.os.observer.ResourceObserver;
+import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
 import org.opensearch.performanceanalyzer.commons.stats.metrics.StatExceptionCode;
 
 public class Ipv6Observer implements ResourceObserver<Long> {
