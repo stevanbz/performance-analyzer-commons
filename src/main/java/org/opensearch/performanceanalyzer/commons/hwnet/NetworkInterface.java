@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.opensearch.performanceanalyzer.commons.collectors.NetInterfaceSummary;
 import org.opensearch.performanceanalyzer.commons.metrics_generator.linux.LinuxIPMetricsGenerator;
 import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
-import org.opensearch.performanceanalyzer.commons.os.metrics.NetworkMetricsCalculator;
+import org.opensearch.performanceanalyzer.commons.hwnet.metrics.NetworkMetricsCalculator;
 import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.DeviceNetworkStatsObserver;
 import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.Ipv4Observer;
 import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.Ipv6Observer;

@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.junit.Test;
 import org.opensearch.performanceanalyzer.commons.collectors.NetInterfaceSummary;
+import org.opensearch.performanceanalyzer.commons.hwnet.metrics.NetworkMetricsCalculator;
 import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.DeviceNetworkStatsObserver;
 import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.Ipv4Observer;
 import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.Ipv6Observer;
