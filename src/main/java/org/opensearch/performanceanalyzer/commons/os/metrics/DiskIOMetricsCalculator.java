@@ -16,31 +16,33 @@ public final class DiskIOMetricsCalculator {
             long startMeasurementTime,
             Map<String, Long> endTimeResourceMetrics,
             Map<String, Long> startTimeResourceMetrics) {
-        if (startMeasurementTime == endMeasurementTime) {
+        if (endMeasurementTime <= startMeasurementTime) {
             return null;
         }
 
         if (endTimeResourceMetrics != null && startTimeResourceMetrics != null) {
             double duration = 1.0e-3 * (endMeasurementTime - startMeasurementTime);
             double readBytes =
-                    endTimeResourceMetrics.get(StatKeys.READ_BYTES.getLabel())
-                            - startTimeResourceMetrics.get(StatKeys.READ_BYTES.getLabel());
+                    endTimeResourceMetrics.getOrDefault(StatKeys.READ_BYTES.getLabel(), 0L)
+                            - startTimeResourceMetrics.getOrDefault(
+                                    StatKeys.READ_BYTES.getLabel(), 0L);
             double writeBytes =
-                    endTimeResourceMetrics.get(StatKeys.WRITE_BYTES.getLabel())
-                            - startTimeResourceMetrics.get(StatKeys.WRITE_BYTES.getLabel());
+                    endTimeResourceMetrics.getOrDefault(StatKeys.WRITE_BYTES.getLabel(), 0L)
+                            - startTimeResourceMetrics.getOrDefault(
+                                    StatKeys.WRITE_BYTES.getLabel(), 0L);
             double readSyscalls =
-                    endTimeResourceMetrics.get(StatKeys.SYSCR.getLabel())
-                            - startTimeResourceMetrics.get(StatKeys.SYSCR.getLabel());
+                    endTimeResourceMetrics.getOrDefault(StatKeys.SYSCR.getLabel(), 0L)
+                            - startTimeResourceMetrics.getOrDefault(StatKeys.SYSCR.getLabel(), 0L);
             double writeSyscalls =
-                    endTimeResourceMetrics.get(StatKeys.SYSCW.getLabel())
-                            - startTimeResourceMetrics.get(StatKeys.SYSCW.getLabel());
+                    endTimeResourceMetrics.getOrDefault(StatKeys.SYSCW.getLabel(), 0L)
+                            - startTimeResourceMetrics.getOrDefault(StatKeys.SYSCW.getLabel(), 0L);
             double readPcBytes =
-                    endTimeResourceMetrics.get(StatKeys.RCHAR.getLabel())
-                            - startTimeResourceMetrics.get(StatKeys.RCHAR.getLabel())
+                    endTimeResourceMetrics.getOrDefault(StatKeys.RCHAR.getLabel(), 0L)
+                            - startTimeResourceMetrics.getOrDefault(StatKeys.RCHAR.getLabel(), 0L)
                             - readBytes;
             double writePcBytes =
-                    endTimeResourceMetrics.get(StatKeys.WCHAR.getLabel())
-                            - startTimeResourceMetrics.get(StatKeys.WCHAR.getLabel())
+                    endTimeResourceMetrics.getOrDefault(StatKeys.WCHAR.getLabel(), 0L)
+                            - startTimeResourceMetrics.getOrDefault(StatKeys.WCHAR.getLabel(), 0L)
                             - writeBytes;
             readBytes /= duration;
             readSyscalls /= duration;

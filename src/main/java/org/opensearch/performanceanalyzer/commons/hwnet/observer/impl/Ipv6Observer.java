@@ -21,6 +21,24 @@ import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
 import org.opensearch.performanceanalyzer.commons.stats.metrics.StatExceptionCode;
 
 public class Ipv6Observer implements ResourceObserver<Long> {
+
+    public enum Ipv6Keys {
+        IN_RECEIVES("Ip6InReceives"),
+        IN_DELIVERS("Ip6InDelivers"),
+        OUT_REQUESTS("Ip6OutRequests"),
+        OUT_DISCARDS("Ip6OutDiscards"),
+        OUT_NO_ROUTES("Ip6OutNoRoutes");
+        private final String label;
+
+        public String getLabel() {
+            return label;
+        }
+
+        Ipv6Keys(String label) {
+            this.label = label;
+        }
+    }
+
     private static final Logger LOG = LogManager.getLogger(Ipv6Observer.class);
     private static final Splitter STRING_PATTERN_SPLITTER = Splitter.on(Pattern.compile("[ \\t]+"));
 

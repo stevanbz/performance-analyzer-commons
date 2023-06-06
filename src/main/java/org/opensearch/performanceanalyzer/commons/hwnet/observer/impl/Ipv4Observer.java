@@ -18,6 +18,24 @@ import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
 import org.opensearch.performanceanalyzer.commons.stats.metrics.StatExceptionCode;
 
 public class Ipv4Observer implements ResourceObserver<Long> {
+
+    public enum Ipv4Keys {
+        IN_RECEIVES("InReceives"),
+        IN_DELIVERS("InDelivers"),
+        OUT_REQUESTS("OutRequests"),
+        OUT_DISCARDS("OutDiscards"),
+        OUT_NO_ROUTES("OutNoRoutes");
+        private final String label;
+
+        public String getLabel() {
+            return label;
+        }
+
+        Ipv4Keys(String label) {
+            this.label = label;
+        }
+    }
+
     private static final Logger LOG = LogManager.getLogger(Ipv4Observer.class);
 
     @Override

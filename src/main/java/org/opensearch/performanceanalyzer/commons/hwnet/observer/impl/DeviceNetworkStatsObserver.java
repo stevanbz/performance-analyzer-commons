@@ -18,6 +18,21 @@ import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
 import org.opensearch.performanceanalyzer.commons.stats.metrics.StatExceptionCode;
 
 public class DeviceNetworkStatsObserver implements ResourceObserver<Long> {
+
+    public enum NetworkStatKeys {
+        IN_BYTES("inbytes"),
+        OUT_BYTES("outbytes");
+        private final String label;
+
+        public String getLabel() {
+            return label;
+        }
+
+        NetworkStatKeys(String label) {
+            this.label = label;
+        }
+    }
+
     private static final Logger LOG = LogManager.getLogger(DeviceNetworkStatsObserver.class);
 
     @Override
