@@ -14,10 +14,10 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensearch.performanceanalyzer.commons.collectors.StatsCollector;
-import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
+import org.opensearch.performanceanalyzer.commons.hwnet.observer.NetObserver;
 import org.opensearch.performanceanalyzer.commons.stats.metrics.StatExceptionCode;
 
-public class Ipv4Observer implements ResourceObserver<Long> {
+public class Ipv4Observer extends NetObserver<Long> {
 
     public enum Ipv4Keys {
         IN_RECEIVES("InReceives"),
