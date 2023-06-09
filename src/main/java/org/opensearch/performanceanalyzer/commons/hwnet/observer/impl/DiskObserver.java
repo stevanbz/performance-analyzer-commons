@@ -5,18 +5,17 @@
 
 package org.opensearch.performanceanalyzer.commons.hwnet.observer.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
-import org.opensearch.performanceanalyzer.commons.os.SchemaFileParser;
-import org.opensearch.performanceanalyzer.commons.os.observer.impl.CPUObserver;
-import org.opensearch.performanceanalyzer.commons.util.Util;
 
 import java.io.File;
 import java.util.*;
 import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.opensearch.performanceanalyzer.commons.hwnet.observer.NetObserver;
+import org.opensearch.performanceanalyzer.commons.os.SchemaFileParser;
+import org.opensearch.performanceanalyzer.commons.util.Util;
 
-public class DiskObserver implements ResourceObserver<Map<String, Object>> {
+public class DiskObserver extends NetObserver<Map<String, Object>> {
     public enum DiskKeys {
         MAJNO("majno"),
         MINNO("minno"),
@@ -43,25 +42,25 @@ public class DiskObserver implements ResourceObserver<Map<String, Object>> {
         }
 
         public static String[] getStatKeys() {
-            return Stream.of(CPUObserver.StatKeys.values()).map(CPUObserver.StatKeys::getLabel).toArray(String[]::new);
+            return Stream.of(values()).map(DiskKeys::getLabel).toArray(String[]::new);
         }
     }
 
     private static SchemaFileParser.FieldTypes statTypes[] = {
-            SchemaFileParser.FieldTypes.INT, // 1
-            SchemaFileParser.FieldTypes.INT,
-            SchemaFileParser.FieldTypes.STRING,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG, // 10
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG,
-            SchemaFileParser.FieldTypes.ULONG
+        SchemaFileParser.FieldTypes.INT, // 1
+        SchemaFileParser.FieldTypes.INT,
+        SchemaFileParser.FieldTypes.STRING,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG, // 10
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG,
+        SchemaFileParser.FieldTypes.ULONG
     };
 
     private static final Logger LOG = LogManager.getLogger(DiskObserver.class);
@@ -86,8 +85,8 @@ public class DiskObserver implements ResourceObserver<Map<String, Object>> {
     }
 
     @Override
-    public Map<String, Object> observe(String threadId) {
-        throw new UnsupportedOperationException("Disk observer is not supporting observing the disk params by thread id");
+    public Map<String, Object> observe(String diskName) {
+        return observe().getOrDefault(diskName, Collections.emptyMap());
     }
 
     private static void listDisks() {

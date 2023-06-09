@@ -69,7 +69,8 @@ public class NetworkInterface {
 
     private static final ResourceObserver ipv6Observer = new Ipv6Observer();
 
-    private static final ResourceObserver deviceNetworkStatsObserver = new DeviceNetworkStatsObserver();
+    private static final ResourceObserver deviceNetworkStatsObserver =
+            new DeviceNetworkStatsObserver();
     private static Map<String, Long> oldMetrics6 = new HashMap<>();
     private static long kvTimestamp = 0;
     private static long oldkvTimestamp = 0;

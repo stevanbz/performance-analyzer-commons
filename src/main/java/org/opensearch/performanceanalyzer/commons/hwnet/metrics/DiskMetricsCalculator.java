@@ -5,11 +5,11 @@
 
 package org.opensearch.performanceanalyzer.commons.hwnet.metrics;
 
-import org.opensearch.performanceanalyzer.commons.collectors.DiskMetrics;
-import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.DiskObserver;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.opensearch.performanceanalyzer.commons.collectors.DiskMetrics;
+import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.DiskObserver;
 
 public class DiskMetricsCalculator {
 
@@ -17,8 +17,7 @@ public class DiskMetricsCalculator {
             long endMeasurementTime,
             long startMeasurementTime,
             Map<String, Map<String, Object>> endTimeResourceMetrics,
-            Map<String, Map<String, Object>> startTimeResourceMetrics
-    ) {
+            Map<String, Map<String, Object>> startTimeResourceMetrics) {
         Map<String, DiskMetrics> map = new HashMap<>();
         if (endMeasurementTime > startMeasurementTime) {
             for (Map.Entry<String, Map<String, Object>> entry : endTimeResourceMetrics.entrySet()) {
@@ -31,21 +30,36 @@ public class DiskMetricsCalculator {
                     double rwdeltatime =
                             1.0
                                     * ((long) m.get(DiskObserver.DiskKeys.RTIME.getLabel())
-                                    + (long) m.get(DiskObserver.DiskKeys.WTIME.getLabel())
-                                    - (long) mold.get(DiskObserver.DiskKeys.RTIME.getLabel())
-                                    - (long) mold.get(DiskObserver.DiskKeys.WTIME.getLabel()));
+                                            + (long) m.get(DiskObserver.DiskKeys.WTIME.getLabel())
+                                            - (long)
+                                                    mold.get(DiskObserver.DiskKeys.RTIME.getLabel())
+                                            - (long)
+                                                    mold.get(
+                                                            DiskObserver.DiskKeys.WTIME
+                                                                    .getLabel()));
                     double rwdeltaiops =
                             1.0
                                     * ((long) m.get(DiskObserver.DiskKeys.RDONE.getLabel())
-                                    + (long) m.get(DiskObserver.DiskKeys.WDONE.getLabel())
-                                    - (long) mold.get(DiskObserver.DiskKeys.RDONE.getLabel())
-                                    - (long) mold.get(DiskObserver.DiskKeys.WDONE.getLabel()));
+                                            + (long) m.get(DiskObserver.DiskKeys.WDONE.getLabel())
+                                            - (long)
+                                                    mold.get(DiskObserver.DiskKeys.RDONE.getLabel())
+                                            - (long)
+                                                    mold.get(
+                                                            DiskObserver.DiskKeys.WDONE
+                                                                    .getLabel()));
                     double rwdeltasectors =
                             1.0
                                     * ((long) m.get(DiskObserver.DiskKeys.RSECTORS.getLabel())
-                                    + (long) m.get(DiskObserver.DiskKeys.WSECTORS.getLabel())
-                                    - (long) mold.get(DiskObserver.DiskKeys.RSECTORS.getLabel())
-                                    - (long) mold.get(DiskObserver.DiskKeys.WSECTORS.getLabel()));
+                                            + (long)
+                                                    m.get(DiskObserver.DiskKeys.WSECTORS.getLabel())
+                                            - (long)
+                                                    mold.get(
+                                                            DiskObserver.DiskKeys.RSECTORS
+                                                                    .getLabel())
+                                            - (long)
+                                                    mold.get(
+                                                            DiskObserver.DiskKeys.WSECTORS
+                                                                    .getLabel()));
 
                     dm.utilization = rwdeltatime / (endMeasurementTime - startMeasurementTime);
                     dm.await = (rwdeltaiops > 0) ? rwdeltatime / rwdeltaiops : 0;
