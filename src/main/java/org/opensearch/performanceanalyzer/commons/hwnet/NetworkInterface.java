@@ -7,20 +7,17 @@ package org.opensearch.performanceanalyzer.commons.hwnet;
 
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Splitter;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensearch.performanceanalyzer.commons.collectors.NetInterfaceSummary;
-import org.opensearch.performanceanalyzer.commons.collectors.StatsCollector;
+import org.opensearch.performanceanalyzer.commons.hwnet.metrics.NetworkMetricsCalculator;
+import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.DeviceNetworkStatsObserver;
+import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.Ipv4Observer;
+import org.opensearch.performanceanalyzer.commons.hwnet.observer.impl.Ipv6Observer;
 import org.opensearch.performanceanalyzer.commons.metrics_generator.linux.LinuxIPMetricsGenerator;
-import org.opensearch.performanceanalyzer.commons.stats.metrics.StatExceptionCode;
+import org.opensearch.performanceanalyzer.commons.observer.ResourceObserver;
 
 public class NetworkInterface {
     private static final Logger LOG = LogManager.getLogger(NetworkInterface.class);
@@ -67,6 +64,13 @@ public class NetworkInterface {
     private static NetInterfaceMetrics currentMetrics = new NetInterfaceMetrics();
     private static NetInterfaceMetrics oldMetrics = new NetInterfaceMetrics();
     private static Map<String, Long> currentMetrics6 = new HashMap<>();
+
+    private static final ResourceObserver ipv4Observer = new Ipv4Observer();
+
+    private static final ResourceObserver ipv6Observer = new Ipv6Observer();
+
+    private static final ResourceObserver deviceNetworkStatsObserver =
+            new DeviceNetworkStatsObserver();
     private static Map<String, Long> oldMetrics6 = new HashMap<>();
     private static long kvTimestamp = 0;
     private static long oldkvTimestamp = 0;
@@ -80,8 +84,6 @@ public class NetworkInterface {
 
     private static LinuxIPMetricsGenerator linuxIPMetricsGenerator = new LinuxIPMetricsGenerator();
 
-    private static final Splitter STRING_PATTERN_SPLITTER = Splitter.on(Pattern.compile("[ \\t]+"));
-
     static {
         addSampleHelper();
     }
@@ -91,198 +93,57 @@ public class NetworkInterface {
     }
 
     protected static void calculateNetworkMetrics() {
-
         if (kvTimestamp <= oldkvTimestamp) {
             linuxIPMetricsGenerator.setInNetworkInterfaceSummary(null);
             linuxIPMetricsGenerator.setOutNetworkInterfaceSummary(null);
             return;
         }
 
-        Map<String, Long> curphy = currentMetrics.PHYmetrics;
-        Map<String, Long> curipv4 = currentMetrics.IPmetrics;
-        Map<String, Long> oldphy = oldMetrics.PHYmetrics;
-        Map<String, Long> oldipv4 = oldMetrics.IPmetrics;
-
-        long nin = curipv4.get("InReceives") - oldipv4.get("InReceives");
-        long nout = curipv4.get("OutRequests") - oldipv4.get("OutRequests");
-        long delivin = curipv4.get("InDelivers") - oldipv4.get("InDelivers");
-        long dropout =
-                curipv4.get("OutDiscards")
-                        + curipv4.get("OutNoRoutes")
-                        - oldipv4.get("OutDiscards")
-                        - oldipv4.get("OutNoRoutes");
-        long nin6 = currentMetrics6.get("Ip6InReceives") - oldMetrics6.get("Ip6InReceives");
-        long nout6 = currentMetrics6.get("Ip6OutRequests") - oldMetrics6.get("Ip6OutRequests");
-        long delivin6 = currentMetrics6.get("Ip6InDelivers") - oldMetrics6.get("Ip6InDelivers");
-        long dropout6 =
-                currentMetrics6.get("Ip6OutDiscards")
-                        + currentMetrics6.get("Ip6OutNoRoutes")
-                        - oldMetrics6.get("Ip6OutDiscards")
-                        - oldMetrics6.get("Ip6OutNoRoutes");
-
-        long timeDelta = kvTimestamp - oldkvTimestamp;
-        double inbps = 8 * 1.0e3 * (curphy.get("inbytes") - oldphy.get("inbytes")) / timeDelta;
-        double outbps = 8 * 1.0e3 * (curphy.get("outbytes") - oldphy.get("outbytes")) / timeDelta;
-        double inPacketRate4 = 1.0e3 * (nin) / timeDelta;
-        double outPacketRate4 = 1.0e3 * (nout) / timeDelta;
-        double inDropRate4 = 1.0e3 * (nin - delivin) / timeDelta;
-        double outDropRate4 = 1.0e3 * (dropout) / timeDelta;
-        double inPacketRate6 = 1.0e3 * (nin6) / timeDelta;
-        double outPacketRate6 = 1.0e3 * (nout6) / timeDelta;
-        double inDropRate6 = 1.0e3 * (nin6 - delivin6) / timeDelta;
-        double outDropRate6 = 1.0e3 * (dropout6) / timeDelta;
-
         NetInterfaceSummary inNetwork =
-                new NetInterfaceSummary(
-                        NetInterfaceSummary.Direction.in,
-                        inPacketRate4,
-                        inDropRate4,
-                        inPacketRate6,
-                        inDropRate6,
-                        inbps);
+                NetworkMetricsCalculator.calculateInNetworkMetrics(
+                        kvTimestamp,
+                        oldkvTimestamp,
+                        currentMetrics.IPmetrics,
+                        oldMetrics.IPmetrics,
+                        currentMetrics6,
+                        oldMetrics6,
+                        currentMetrics.PHYmetrics,
+                        oldMetrics.PHYmetrics);
 
         NetInterfaceSummary outNetwork =
-                new NetInterfaceSummary(
-                        NetInterfaceSummary.Direction.out,
-                        outPacketRate4,
-                        outDropRate4,
-                        outPacketRate6,
-                        outDropRate6,
-                        outbps);
+                NetworkMetricsCalculator.calculateOutNetworkMetrics(
+                        kvTimestamp,
+                        oldkvTimestamp,
+                        currentMetrics.IPmetrics,
+                        oldMetrics.IPmetrics,
+                        currentMetrics6,
+                        oldMetrics6,
+                        currentMetrics.PHYmetrics,
+                        oldMetrics.PHYmetrics);
 
         linuxIPMetricsGenerator.setInNetworkInterfaceSummary(inNetwork);
         linuxIPMetricsGenerator.setOutNetworkInterfaceSummary(outNetwork);
     }
 
-    private static void getKeys(String line) {
-        if (IPkeys != null) {
-            // { && TCPkeys != null &&
-            // UDPkeys != null && ICMPkeys != null) {
-            return;
-        }
-        if (line.startsWith("Ip:")) {
-            IPkeys = line.split("\\s+");
-        } /*else if (line.startsWith("Icmp:")) {
-              ICMPkeys = line.split("\\s+");
-          } else if (line.startsWith("Tcp:")) {
-              TCPkeys = line.split("\\s+");
-          } else if (line.startsWith("Udp:")) {
-              UDPkeys = line.split("\\s+");
-          }*/
-    }
-
-    private static void generateMap(String line) {
-        Map<String, Long> map = null;
-        String[] keys = null;
-        if (line.startsWith("Ip:")) {
-            map = currentMetrics.IPmetrics;
-            keys = IPkeys;
-        } /*else if (line.startsWith("Icmp:")) {
-              map = currentMetrics.ICMPmetrics;
-              keys = ICMPkeys;
-          } else if (line.startsWith("Tcp:")) {
-              map = currentMetrics.TCPmetrics;
-              keys = TCPkeys;
-          } else if (line.startsWith("Udp:")) {
-              map = currentMetrics.UDPmetrics;
-              keys = UDPkeys;
-          }*/
-        if (keys != null) {
-            generateMap(line, keys, map);
-        }
-    }
-
-    private static void generateMap(String line, String[] keys, Map<String, Long> map) {
-        String[] values = line.split("\\s+");
-        int count = values.length;
-        map.put(keys[0], 0L);
-        for (int i = 1; i < count; i++) {
-            map.put(keys[i], Long.parseLong(values[i]));
-        }
-    }
-
     private static void addSample4() {
-        int ln = 0;
-
         oldMetrics.clearAll();
         oldMetrics.putAll(currentMetrics);
         currentMetrics.clearAll();
         oldkvTimestamp = kvTimestamp;
         kvTimestamp = System.currentTimeMillis();
-
-        try (FileReader fileReader = new FileReader(new File("/proc/net/snmp"));
-                BufferedReader bufferedReader = new BufferedReader(fileReader); ) {
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (ln % 2 == 0) { // keys
-                    getKeys(line);
-                } else {
-                    generateMap(line);
-                }
-                ln++;
-            }
-        } catch (Exception e) {
-            LOG.debug(
-                    "Exception in calling addSample4 with details: {} with ExceptionCode: {}",
-                    () -> e.toString(),
-                    () -> StatExceptionCode.NETWORK_COLLECTION_ERROR.toString());
-            StatsCollector.instance().logException(StatExceptionCode.NETWORK_COLLECTION_ERROR);
-        }
+        currentMetrics.IPmetrics.putAll(ipv4Observer.observe());
     }
 
     private static void addSample6() {
         oldMetrics6.clear();
         oldMetrics6.putAll(currentMetrics6);
         currentMetrics6.clear();
-
-        try (FileReader fileReader = new FileReader(new File("/proc/net/snmp6"));
-                BufferedReader bufferedReader = new BufferedReader(fileReader); ) {
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                List<String> toks = STRING_PATTERN_SPLITTER.splitToList(line);
-                if (toks.size() > 1) {
-                    currentMetrics6.put(toks.get(0), Long.parseLong(toks.get(1)));
-                }
-            }
-        } catch (Exception e) {
-            LOG.debug(
-                    "Exception in calling addSample6 with details: {} with ExceptionCode: {}",
-                    () -> e.toString(),
-                    () -> StatExceptionCode.NETWORK_COLLECTION_ERROR.toString());
-            StatsCollector.instance().logException(StatExceptionCode.NETWORK_COLLECTION_ERROR);
-        }
+        currentMetrics6.putAll(ipv6Observer.observe());
     }
 
     // this assumes that addSample4() is called
     private static void addDeviceStats() {
-        try (FileReader fileReader = new FileReader(new File("/proc/net/dev"));
-                BufferedReader bufferedReader = new BufferedReader(fileReader); ) {
-            String line = null;
-            long intotbytes = 0;
-            long outtotbytes = 0;
-            long intotpackets = 0;
-            long outtotpackets = 0;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains("Receive") || line.contains("packets")) {
-                    continue;
-                }
-                String[] toks = line.trim().split(" +");
-                intotbytes += Long.parseLong(toks[1]);
-                intotpackets += Long.parseLong(toks[2]);
-                outtotbytes += Long.parseLong(toks[9]);
-                outtotpackets += Long.parseLong(toks[10]);
-            }
-            currentMetrics.PHYmetrics.put("inbytes", intotbytes);
-            currentMetrics.PHYmetrics.put("inpackets", intotpackets);
-            currentMetrics.PHYmetrics.put("outbytes", outtotbytes);
-            currentMetrics.PHYmetrics.put("outpackets", outtotpackets);
-        } catch (Exception e) {
-            LOG.debug(
-                    "Exception in calling addDeviceStats with details: {} with ExceptionCode: {}",
-                    () -> e.toString(),
-                    () -> StatExceptionCode.NETWORK_COLLECTION_ERROR.toString());
-            StatsCollector.instance().logException(StatExceptionCode.NETWORK_COLLECTION_ERROR);
-        }
+        currentMetrics.PHYmetrics.putAll(deviceNetworkStatsObserver.observe());
     }
 
     public static void addSample() {

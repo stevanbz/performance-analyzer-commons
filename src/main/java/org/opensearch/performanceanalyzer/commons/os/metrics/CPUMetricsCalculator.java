@@ -30,7 +30,7 @@ public final class CPUMetricsCalculator {
             long startMeasurementTime,
             Map<String, Object> endTimeResourceMetrics,
             Map<String, Object> startTimeResourceMetrics) {
-        if (startMeasurementTime == endMeasurementTime) {
+        if (endMeasurementTime <= startMeasurementTime) {
             return null;
         }
 
@@ -66,7 +66,7 @@ public final class CPUMetricsCalculator {
             long startMeasurementTime,
             Map<String, Object> endTimeResourceMetrics,
             Map<String, Object> startTimeResourceMetrics) {
-        if (endMeasurementTime == startMeasurementTime) {
+        if (endMeasurementTime <= startMeasurementTime) {
             return 0D;
         }
         if (endTimeResourceMetrics == null || startTimeResourceMetrics == null) {
@@ -86,6 +86,10 @@ public final class CPUMetricsCalculator {
             long startMeasurementTime,
             Map<String, Object> endTimeResourceMetrics,
             Map<String, Object> startTimeResourceMetrics) {
+        if (endMeasurementTime <= startMeasurementTime) {
+            return 0d;
+        }
+
         if (endTimeResourceMetrics == null || startTimeResourceMetrics == null) {
             return 0d;
         }
@@ -102,6 +106,9 @@ public final class CPUMetricsCalculator {
             long startMeasurementTime,
             Map<String, Object> endTimeResourceMetrics,
             Map<String, Object> startTimeResourceMetrics) {
+        if (endMeasurementTime <= startMeasurementTime) {
+            return 0d;
+        }
         if (endTimeResourceMetrics == null || startTimeResourceMetrics == null) {
             return 0d;
         }

@@ -25,8 +25,7 @@ public final class SchedMetricsCalculator {
             long startMeasurementTime,
             Map<String, Object> endTimeResourceMetrics,
             Map<String, Object> startTimeResourceMetrics) {
-
-        if (startMeasurementTime == endMeasurementTime) {
+        if (endMeasurementTime <= startMeasurementTime) {
             return null;
         }
 
